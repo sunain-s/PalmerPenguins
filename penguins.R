@@ -11,16 +11,19 @@ library(plotly)
 # dim(penguins)
 # names(penguins)
 # str(penguins)
+# View(penguins)
 
-# Heaviest Species
+# Q1: Heaviest Species
 #------------------------------------------------------------------------------
 
 # Filter data
 avg_mass_by_species <- penguins %>%
   group_by(species) %>%
-  summarise(n_penguins = sum(!is.na(body_mass_g)),
-            avg_mass = mean(body_mass_g, na.rm=TRUE),
-            .groups = "drop") %>%
+  summarise(
+    n_penguins = sum(!is.na(body_mass_g)),
+    avg_mass = mean(body_mass_g, na.rm=TRUE),
+    .groups = "drop"
+    ) %>%
   arrange(desc(avg_mass)) %>%
   mutate(species = factor(species, levels = species))
 print(avg_mass_by_species)
@@ -92,7 +95,18 @@ htmlwidgets::saveWidget(
 )
 browseURL("output/interactive/species_mass_plot.html")
 
+# Q2: Males vs Female weight
+#------------------------------------------------------------------------------
 
-
+avg_mass_by_sex <- penguins %>%
+  mutate(sex = ifelse(is.na(sex), "Unknown", as.character(sex))) %>%
+  group_by(sex) %>%
+  summarise(
+    n_penguins = sum(!is.na(body_mass_g)),
+    avg_mass = mean(body_mass_g, na.rm=TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(avg_mass))
+print(avg_mass_by_sex)
 
 
