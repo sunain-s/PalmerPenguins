@@ -13,6 +13,33 @@ library(plotly)
 # str(penguins)
 # View(penguins)
 
+dir.create("output/static", recursive = TRUE, showWarnings = FALSE)
+dir.create("output/interactive", recursive = TRUE, showWarnings = FALSE)
+
+# Save plots
+save_plot <- function(plot, filename, width = 8, height = 5, static, interactive, open) {
+  if (static) {
+    ggsave(
+      filename = paste0("output/static/", filename, ".png"),
+      plot = plot,
+      width = width,
+      height = height
+    )
+  }
+  
+  if (interactive) {
+    htmlwidgets::saveWidget(
+      ggplotly(plot),
+      paste0("output/interactive/", filename, ".html"),
+      selfcontained = TRUE
+    )
+      if (open) {
+        browseURL("output/interactive/species_mass_plot.html")
+      }
+  }
+  
+}
+
 # Q1: Heaviest Species
 #------------------------------------------------------------------------------
 
@@ -69,41 +96,19 @@ species_mass_plot_interactive <- ggplotly(
 )
 species_mass_plot_interactive
 
-
-# Save static plot image
-if (!dir.exists("output")) {
-  dir.create("output")
-}
-if (!dir.exists("output/static")) {
-  dir.create("output/static")
-}
-if (!dir.exists("output/interactive")) {
-  dir.create("output/interactive")
-}
-
-ggsave(
-  "output/static/species_mass_plot.png",
-  plot = species_mass_plot,
-  width = 8,
-  height = 5
-)
-
-htmlwidgets::saveWidget(
-  species_mass_plot_interactive,
-  "output/interactive/species_mass_plot.html",
-  selfcontained = TRUE
-)
-browseURL("output/interactive/species_mass_plot.html")
+save_plot(species_mass_plot, "species_mass_plot", static = TRUE, interactive = TRUE, open = TRUE)
 
 # Q2: Males vs Female weight
 #------------------------------------------------------------------------------
 
 avg_mass_by_sex <- penguins %>%
-  mutate(sex = ifelse(is.na(sex), "Unknown", as.character(sex))) %>%
+  mutate(
+    sex = replace_na(as.character(sex), "Unknown")
+    ) %>%
   group_by(sex) %>%
   summarise(
     n_penguins = sum(!is.na(body_mass_g)),
-    avg_mass = mean(body_mass_g, na.rm=TRUE),
+    avg_mass = round(mean(body_mass_g, na.rm=TRUE), 1),
     .groups = "drop"
   ) %>%
   arrange(desc(avg_mass))
