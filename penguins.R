@@ -17,7 +17,13 @@ dir.create("output/static", recursive = TRUE, showWarnings = FALSE)
 dir.create("output/interactive", recursive = TRUE, showWarnings = FALSE)
 
 # Save plots
-save_plot <- function(plot, filename, width = 8, height = 5, static, interactive, open) {
+save_plot <- function(plot, 
+                      filename, 
+                      width = 8, 
+                      height = 5, 
+                      static = TRUE, 
+                      interactive = TRUE, 
+                      open = FALSE) {
   if (static) {
     ggsave(
       filename = paste0("output/static/", filename, ".png"),
@@ -34,7 +40,7 @@ save_plot <- function(plot, filename, width = 8, height = 5, static, interactive
       selfcontained = TRUE
     )
       if (open) {
-        browseURL("output/interactive/species_mass_plot.html")
+        browseURL(paste0("output/interactive/", filename, ".html"))
       }
   }
   
@@ -96,11 +102,12 @@ species_mass_plot_interactive <- ggplotly(
 )
 species_mass_plot_interactive
 
-save_plot(species_mass_plot, "species_mass_plot", static = TRUE, interactive = TRUE, open = TRUE)
+save_plot(species_mass_plot, "species_mass_plot", open = TRUE)
 
 # Q2: Males vs Female weight
 #------------------------------------------------------------------------------
 
+# Filter data
 avg_mass_by_sex <- penguins %>%
   mutate(
     sex = replace_na(as.character(sex), "Unknown")
@@ -113,5 +120,31 @@ avg_mass_by_sex <- penguins %>%
   ) %>%
   arrange(desc(avg_mass))
 print(avg_mass_by_sex)
+
+# Create box plot
+sex_box_plot <- penguins %>%
+  filter(!is.na(sex), !is.na(body_mass_g)) %>%
+  ggplot(
+    aes(x = sex, 
+        y = body_mass_g, 
+        fill = sex
+        )
+    ) +
+  geom_boxplot() +
+  labs(
+    title = "Body Mass Distribution by Sex",
+    x = "Sex",
+    y = "Body Mass (g)"
+  ) +
+  theme_classic() +
+  theme(
+    legend.position = "none"
+  )
+sex_box_plot
+
+save_plot(sex_box_plot, "sex_box_plot", open = TRUE)
+
+
+
 
 
