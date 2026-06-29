@@ -37,7 +37,7 @@ save_plot <- function(plot,
   # Interactive plot saving
   if (interactive) {
     htmlwidgets::saveWidget(
-      ggplotly(plot),
+      ggplotly(plot, tooltip = "text"),
       paste0("output/interactive/", filename, ".html"),
       selfcontained = TRUE
     )
